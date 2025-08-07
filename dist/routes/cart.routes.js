@@ -1,0 +1,25 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const cart_controller_1 = require("../controllers/cart.controller");
+const auth_middleware_1 = require("../middlewares/auth.middleware");
+const validation_middleware_1 = require("../middlewares/validation.middleware");
+const security_middleware_1 = require("../middlewares/security.middleware");
+const audit_middleware_1 = require("../middlewares/audit.middleware");
+const router = (0, express_1.Router)();
+router.use(security_middleware_1.sanitizeInput);
+router.use(security_middleware_1.validateContentType);
+router.use(security_middleware_1.detectAttacks);
+router.use((0, security_middleware_1.validatePayloadSize)(1024 * 1024));
+router.use(security_middleware_1.cartRateLimit);
+router.use(auth_middleware_1.authMiddleware);
+router.use(auth_middleware_1.checkTokenExpiration);
+router.get('/', cart_controller_1.CartController.getCart);
+router.post('/items', validation_middleware_1.cartValidations.addItem, (0, audit_middleware_1.auditDataModifications)('cart'), cart_controller_1.CartController.addItemToCart);
+router.put('/items/:cartItemId', validation_middleware_1.cartValidations.updateItem, (0, audit_middleware_1.auditDataModifications)('cart'), cart_controller_1.CartController.updateItemQuantity);
+router.delete('/items/:cartItemId', (0, audit_middleware_1.auditDataModifications)('cart'), cart_controller_1.CartController.removeItemFromCart);
+router.delete('/', (0, audit_middleware_1.auditDataModifications)('cart'), cart_controller_1.CartController.clearCart);
+router.get('/summary', cart_controller_1.CartController.getCartSummary);
+router.get('/total', cart_controller_1.CartController.getCartTotal);
+exports.default = router;
+//# sourceMappingURL=cart.routes.js.map

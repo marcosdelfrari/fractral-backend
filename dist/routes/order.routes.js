@@ -1,0 +1,28 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const order_controller_1 = require("../controllers/order.controller");
+const auth_middleware_1 = require("../middlewares/auth.middleware");
+const validation_middleware_1 = require("../middlewares/validation.middleware");
+const authorization_middleware_1 = require("../middlewares/authorization.middleware");
+const security_middleware_1 = require("../middlewares/security.middleware");
+const audit_middleware_1 = require("../middlewares/audit.middleware");
+const router = (0, express_1.Router)();
+router.use(security_middleware_1.sanitizeInput);
+router.use(security_middleware_1.validateContentType);
+router.use(security_middleware_1.detectAttacks);
+router.use((0, security_middleware_1.validatePayloadSize)(1024 * 1024));
+router.use(security_middleware_1.orderRateLimit);
+router.use(auth_middleware_1.authMiddleware);
+router.use(auth_middleware_1.checkTokenExpiration);
+router.post('/', validation_middleware_1.orderValidations.createOrder, audit_middleware_1.auditFinancialOperations, order_controller_1.OrderController.createOrder);
+router.get('/admin/all', authorization_middleware_1.requireAdmin, security_middleware_1.adminRateLimit, audit_middleware_1.auditAdminAccess, order_controller_1.OrderController.getAllOrders);
+router.get('/admin/stats', authorization_middleware_1.requireAdmin, security_middleware_1.adminRateLimit, audit_middleware_1.auditAdminAccess, order_controller_1.OrderController.getOrderStats);
+router.get('/admin/recent', authorization_middleware_1.requireAdmin, security_middleware_1.adminRateLimit, audit_middleware_1.auditAdminAccess, order_controller_1.OrderController.getRecentOrders);
+router.get('/admin/by-status/:status', authorization_middleware_1.requireAdmin, security_middleware_1.adminRateLimit, audit_middleware_1.auditAdminAccess, order_controller_1.OrderController.getOrdersByStatus);
+router.get('/', order_controller_1.OrderController.getUserOrders);
+router.get('/:orderId', order_controller_1.OrderController.getOrderById);
+router.put('/:orderId/status', validation_middleware_1.orderValidations.updateStatus, authorization_middleware_1.requireOrderModificationPermission, (0, audit_middleware_1.auditDataModifications)('order'), order_controller_1.OrderController.updateOrderStatus);
+router.delete('/:orderId', authorization_middleware_1.requireOrderCancellationPermission, (0, audit_middleware_1.auditDataModifications)('order'), order_controller_1.OrderController.cancelOrder);
+exports.default = router;
+//# sourceMappingURL=order.routes.js.map

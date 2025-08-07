@@ -55,7 +55,7 @@ export class AdminController {
       
       const totalRevenue = orders.reduce((sum, order) => {
         const orderTotal = order.items.reduce((itemSum, item) => {
-          return itemSum + (item.price * item.quantity);
+          return itemSum + (item.unitPrice * item.quantity);
         }, 0);
         return sum + orderTotal;
       }, 0);
@@ -75,7 +75,7 @@ export class AdminController {
 
       const monthlyRevenue = monthlyOrders.reduce((sum, order) => {
         const orderTotal = order.items.reduce((itemSum, item) => {
-          return itemSum + (item.price * item.quantity);
+          return itemSum + (item.unitPrice * item.quantity);
         }, 0);
         return sum + orderTotal;
       }, 0);
@@ -389,7 +389,7 @@ export class AdminController {
       // Calcular total de cada pedido
       const ordersWithTotal = orders.map(order => {
         const total = order.items.reduce((sum, item) => {
-          return sum + (item.price * item.quantity);
+          return sum + (item.unitPrice * item.quantity);
         }, 0);
         return { ...order, total };
       });
@@ -491,7 +491,7 @@ export class AdminController {
       const totalOrders = orders.length;
       const totalRevenue = orders.reduce((sum, order) => {
         const orderTotal = order.items.reduce((itemSum, item) => {
-          return itemSum + (item.price * item.quantity);
+          return itemSum + (item.unitPrice * item.quantity);
         }, 0);
         return sum + orderTotal;
       }, 0);
@@ -509,7 +509,7 @@ export class AdminController {
             };
           }
           productSales[item.productId].quantity += item.quantity;
-          productSales[item.productId].revenue += item.price * item.quantity;
+          productSales[item.productId].revenue += item.unitPrice * item.quantity;
         });
       });
 
@@ -715,7 +715,7 @@ export class AdminController {
       const totalSpent = user.orders.reduce((sum, order) => {
         if (order.status === 'cancelled') return sum;
         const orderTotal = order.items.reduce((itemSum, item) => {
-          return itemSum + (item.price * item.quantity);
+          return itemSum + (item.unitPrice * item.quantity);
         }, 0);
         return sum + orderTotal;
       }, 0);
