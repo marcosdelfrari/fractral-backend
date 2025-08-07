@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const cors_1 = __importDefault(require("cors"));
+const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
+const swagger_config_1 = require("./config/swagger.config");
 const product_routes_1 = __importDefault(require("./routes/product.routes"));
 const auth_routes_1 = __importDefault(require("./routes/auth.routes"));
 const user_routes_1 = __importDefault(require("./routes/user.routes"));
@@ -28,13 +30,32 @@ app.use((0, cors_1.default)({
 }));
 app.use(express_1.default.json({ limit: '1mb' }));
 app.use(express_1.default.urlencoded({ extended: true, limit: '1mb' }));
+const swaggerOptions = {
+    customCss: `
+    .topbar-wrapper img { display: none; }
+    .swagger-ui .topbar { background-color: #2c3e50; }
+    .swagger-ui .info .title { color: #2c3e50; }
+  `,
+    customSiteTitle: 'Fractral E-commerce API',
+    customfavIcon: '/favicon.ico'
+};
+app.use('/', swagger_ui_express_1.default.serve);
+app.get('/', swagger_ui_express_1.default.setup(swagger_config_1.swaggerSpec, swaggerOptions));
+app.get('/api-docs.json', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swagger_config_1.swaggerSpec);
+});
 app.use('/api/products', product_routes_1.default);
 app.use('/api/auth', auth_routes_1.default);
 app.use('/api/user', user_routes_1.default);
 app.use('/api/cart', cart_routes_1.default);
 app.use('/api/orders', order_routes_1.default);
 app.use('/api/admin', admin_routes_1.default);
-app.get('/', (_, res) => res.send('API do E-commerce está rodando 🚀'));
+app.get('/health', (_, res) => res.json({
+    success: true,
+    message: 'API do E-commerce está rodando 🚀',
+    timestamp: new Date().toISOString()
+}));
 app.use((err, req, res, next) => {
     console.error('Erro não tratado:', err);
     res.status(500).json({
